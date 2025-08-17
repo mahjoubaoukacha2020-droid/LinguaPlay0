@@ -1,0 +1,34 @@
+import streamlit as st
+import openai
+from gtts import gTTS
+import os
+
+# ضع هنا مفتاح OpenAI الخاص بك
+openai.api_key = "YOUR_OPENAI_API_KEY"
+
+st.set_page_config(page_title="🌍 LinguaPlay Ultra Max", layout="wide")
+st.title("🌍 منصة لتعلم اللغات بالذكاء الاصطناعي")
+
+# اختيار اللغة
+language = st.selectbox("اختر اللغة:", ["English", "Français", "العربية", "Darija (Moroccan)"])
+
+# إدخال النص
+user_input = st.text_input("اكتب جملة لتعلمها أو ترجمتها:")
+
+if st.button("ترجم وتحدث"):
+    if user_input:
+        prompt = f"Translate this sentence to {language} and explain it simply: {user_input}"
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=prompt,
+            max_tokens=150
+        )
+        translation = response.choices[0].text.strip()
+        st.success(translation)
+
+        # تحويل النص إلى صوت
+        tts = gTTS(translation, lang="en")
+        tts.save("output.mp3")
+        audio_file = open("output.mp3", "rb")
+        st.audio(audio_file.read(), format="audio/mp3")
+        os.remove("output.mp3")
